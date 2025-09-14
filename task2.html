@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Real-time Chat (Multi-user Demo)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root{
+      --bg:#fff1e6;
+      --card:#fff;
+      --accent:#e94f37;
+      --muted:#6b6b6b;
+      --primary:#0b2b5a;
+    }
+    *{box-sizing:border-box;font-family:Inter, system-ui, Arial, sans-serif}
+    body,html{height:100%;margin:0;background:var(--bg);color:var(--primary)}
+    .app-root{display:flex;flex-direction:column;min-height:100vh;align-items:center;padding:20px}
+    .topbar{width:100%;max-width:420px;text-align:left;padding:18px 24px;border-radius:8px 8px 0 0;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,0.05);margin-bottom:12px}
+    .brand{font-weight:800;font-size:18px}
+    .subtitle{font-size:12px;color:var(--muted);margin-top:4px}
+    .main-content{width:100%;max-width:420px;flex:1;background:var(--card);padding:18px;border-radius:6px;box-shadow:0 6px 24px rgba(0,0,0,0.06)}
+    .footer{width:100%;max-width:420px;margin-top:12px;padding:12px;text-align:center;border-radius:0 0 8px 8px;background:transparent;color:var(--muted);font-size:13px}
+    .chat-layout{display:flex;flex-direction:column;height:66vh;min-height:420px}
+    .chat-header{display:flex;justify-content:space-between;align-items:center;padding:8px 6px;border-bottom:1px dashed #eee}
+    .btn-secondary{padding:6px 8px;border-radius:6px;border:1px solid #ddd;background:white;cursor:pointer;font-size:12px}
+    .btn-primary{background:var(--accent);border:0;color:white;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:12px}
+    .messages{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:10px;background:linear-gradient(180deg, #fffaf3, #fff);border-radius:6px;margin:12px 0}
+    .message{display:flex;gap:10px;align-items:flex-start}
+    .message.me{flex-direction:row-reverse;justify-content:flex-end}
+    .message-avatar{width:30px;height:30px;border-radius:28px;background:#fde8df;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--accent)}
+    .message-body{max-width:78%}
+    .message-meta{display:flex;gap:10px;align-items:center;font-size:11px;color:var(--muted)}
+    .msg-time{font-size:11px;color:#b2b2b2}
+    .message-text{background:#fff;padding:8px;border-radius:8px;margin-top:4px;box-shadow:0 1px 3px rgba(0,0,0,0.03)}
+    .composer{display:flex;gap:6px;border-top:1px solid #eee;padding-top:8px}
+    .composer input{flex:1;padding:8px;border-radius:8px;border:1px solid #eee}
+    .user-select{margin-bottom:12px}
+  </style>
+</head>
+<body>
+  <div class="app-root">
+    <header class="topbar">
+      <div class="brand">Real-time Chat Application</div>
+      <div class="subtitle">Multi-user demo (single HTML file)</div>
+    </header>
+
+    <main class="main-content">
+      <div class="chat-layout">
+        <div class="chat-header">
+          <div>
+            <label for="userSelect">You are: </label>
+            <select id="userSelect" class="user-select">
+              <option>Alice</option>
+              <option>Bob</option>
+              <option>Charlie</option>
+              <option>Dave</option>
+            </select>
+          </div>
+        </div>
+        <div class="messages" id="messages"></div>
+        <form class="composer" id="chatForm">
+          <input id="chatInput" placeholder="Type a message..." />
+          <button type="submit" class="btn-primary">Send</button>
+        </form>
+      </div>
+    </main>
+
+    <footer class="footer">© 2025 RealTime Chat. Multi-user demo</footer>
+  </div>
+
+  <script>
+    const messagesDiv = document.getElementById("messages");
+    const form = document.getElementById("chatForm");
+    const input = document.getElementById("chatInput");
+    const userSelect = document.getElementById("userSelect");
+
+    function formatTime(ts){
+      const d = new Date(ts);
+      return d.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});
+    }
+
+    function appendMessage(m, me=false){
+      const div = document.createElement("div");
+      div.className = "message" + (me?" me":"");
+      div.innerHTML = `
+        <div class="message-avatar">${m.username[0].toUpperCase()}</div>
+        <div class="message-body">
+          <div class="message-meta"><strong>${m.username}</strong><span class="msg-time">${formatTime(m.ts)}</span></div>
+          <div class="message-text">${m.text}</div>
+        </div>
+      `;
+      messagesDiv.appendChild(div);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    form.onsubmit = (e)=>{
+      e.preventDefault();
+      const text = input.value.trim();
+      if(!text) return;
+      const msg = { username: userSelect.value, text, ts: Date.now() };
+      appendMessage(msg, true);
+      // Simulate broadcasting (echo to other users)
+      setTimeout(()=>{
+        appendMessage(msg, false);
+      }, 300);
+      input.value="";
+    };
+  </script>
+</body>
+</html>

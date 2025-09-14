@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Developer Portfolio — Roshini</title>
+  <meta name="description" content="Personal portfolio to showcase projects, skills and contact details." />
+  <style>
+    /* keep your same CSS, unchanged */
+    :root{
+      --bg:#0f1724; --card:#0b1220; --muted:#9aa7bd;
+      --accent:#06b6d4; --glass: rgba(255,255,255,0.03);
+      --radius:14px; --max-width:1100px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:linear-gradient(180deg, var(--bg) 0%, #071022 100%);color:#e6eef6}
+    a{color:inherit;text-decoration:none}
+    .wrap{max-width:var(--max-width);margin:0 auto;padding:28px}
+    header{position:sticky;top:12px;z-index:40}
+    .nav{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px;border-radius:18px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));backdrop-filter:blur(6px)}
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#7c3aed);display:flex;align-items:center;justify-content:center;font-weight:700}
+    nav ul{display:flex;gap:14px;list-style:none;margin:0;padding:0}
+    nav li{font-size:15px;color:var(--muted)}
+    .cta{padding:8px 12px;border-radius:10px;background:var(--accent);color:#04202a;font-weight:600}
+    .menu-toggle{display:none;background:transparent;border:0;color:var(--muted);font-size:20px}
+    @media (max-width:820px){nav ul{display:none}.menu-toggle{display:block}}
+    .hero{display:flex;gap:28px;align-items:center;padding:48px 0}
+    .hero .left{flex:1}
+    .name{font-size:34px;margin:0 0 8px}
+    .title{color:var(--accent);font-weight:700}
+    .lead{color:var(--muted);line-height:1.6}
+    .hero .actions{margin-top:18px;display:flex;gap:12px}
+    .btn{padding:10px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:var(--glass);font-weight:600}
+    .hero .right{width:300px;min-width:220px}
+    .profile-card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:18px;border-radius:16px}
+    .avatar img{width:100%;height:220px;border-radius:10px;object-fit:cover}
+    section{padding:36px 0}
+    h2{margin:0 0 18px;font-size:20px}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+    .card{background:var(--card);padding:16px;border-radius:12px}
+    .card h3{margin:0 0 8px;font-size:16px}
+    .card p{color:var(--muted);font-size:14px}
+    .tags{margin-top:12px;display:flex;flex-wrap:wrap;gap:8px}
+    .tag{padding:6px 8px;border-radius:8px;background:rgba(255,255,255,0.03);font-size:12px;color:var(--muted)}
+    .skills{display:flex;flex-wrap:wrap;gap:10px}
+    .skill{padding:8px 12px;border-radius:999px;background:linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));font-size:13px;color:var(--muted)}
+    .contact-grid{display:grid;grid-template-columns:2fr 1fr;gap:18px}
+    .contact-form input,.contact-form textarea{width:100%;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
+    .contact-form button{margin-top:12px}
+    footer{padding:20px 0;color:var(--muted);font-size:14px;text-align:center}
+    @media (max-width:1100px){.grid{grid-template-columns:repeat(2,1fr)}}
+    @media (max-width:720px){.hero{flex-direction:column}.hero .right{width:100%}.grid{grid-template-columns:1fr}.contact-grid{grid-template-columns:1fr}}
+    html{scroll-behavior:smooth}
+  /* Projects */
+.project-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 25px;
+  max-width: 1100px;
+  margin: auto;
+}
+.project {
+  background: var(--card);   /* Use consistent dark card color */
+  color: #e6eef6;            /* Light text */
+  padding: 25px;
+  border-radius: 12px;
+  text-align: center;
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.project:hover {
+  transform: translateY(-6px);
+  background: #1a2234;       /* Slightly lighter card on hover */
+}
+
+.project h3 {
+  margin-bottom: 10px;
+  color: var(--accent);      /* Accent color for headings */
+}
+
+
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="nav">
+        <div class="brand">
+          <div class="logo">MR</div>
+          <div>
+            <div style="font-weight:700">Maramulla Roshini</div>
+            <div style="font-size:12px;color:var(--muted)">Frontend Developer</div>
+          </div>
+        </div>
+        <nav>
+          <button class="menu-toggle" aria-expanded="false" aria-controls="nav-list">☰</button>
+          <ul id="nav-list">
+            <li><a href="#home">Home</a></li>
+            <li><a href="#about">About Me</a></li>
+            <li><a href="#projects">Projects</a></li>
+            <li><a href="#skills">Skills</a></li>
+            <li><a href="#contact">Contact</a></li>
+          </ul>
+        </nav>
+        <a class="cta" href="#contact">Hire Me</a>
+      </div>
+    </header>
+
+    <main>
+      <!-- Home -->
+      <section id="home" class="hero">
+        <div class="left">
+          <h1 class="name">Hi — I'm <span class="title">Maramulla Roshini</span></h1>
+          <p class="lead">A passionate frontend developer who loves building clean, responsive web applications and interfaces. I enjoy turning complex problems into simple, elegant user experiences.</p>
+          <div class="actions">
+            <a class="btn" href="#projects">View Projects</a>
+            <a class="btn" href="#contact">Get in touch</a>
+          </div>
+          <div style="margin-top:22px">
+            <h3 style="margin:0 0 8px">Quick Info</h3>
+            <div style="display:flex;gap:12px;color:var(--muted);flex-wrap:wrap">
+              <div>📍 Hyderabad, India</div>
+              <div>💼 Open to work</div>
+              <div>✉ roshini@gmail.com</div>
+            </div>
+          </div>
+        </div>
+        <aside class="right">
+          <div class="profile-card">
+            <div class="avatar"> <img src="7b0491e5-bceb-43dc-a109-c51aba3c46b2.png" alt="Roshini working on laptop">
+           <div style="margin-top:12px">
+              <div style="font-weight:700">Maramulla Roshini</div>
+              <div style="color:var(--muted);font-size:13px">Frontend Developer - React - HTML/CSS</div>
+              <div style="margin-top:10px;display:flex;gap:8px">
+                <a class="btn" href="#contact">Contact</a>
+                <a class="btn" href="#projects">Projects</a>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <!-- About -->
+      <section id="about">
+        <h2>About Me</h2>
+        <p style="color:var(--muted);max-width:800px">
+          I am a frontend developer with experience in building responsive, interactive, and user-friendly web applications. I love working with modern technologies like React and Tailwind, and I have a strong foundation in HTML, CSS, and JavaScript.  
+          My goal is to design websites that not only look good but also provide smooth user experiences.  
+          Outside of coding, I enjoy reading about UI/UX design trends and contributing to open-source projects.
+        </p>
+      </section>
+   <!-- Projects Section -->
+  <section id="projects">
+    <h2>My Projects</h2>
+    <div class="project-container">
+      <div class="project">
+        <h3>Portfolio Website</h3>
+        <p>A responsive personal portfolio to showcase my projects and skills.</p>
+      </div>
+      <div class="project">
+        <h3>Online Voting System</h3>
+        <p>A secure web app for online voting with login, registration, and results module.</p>
+      </div>
+      <div class="project">
+        <h3>Todo List App</h3>
+        <p>A simple task management app with add, edit, and delete features.</p>
+      </div>
+    </div>
+  </section>
+   
+      
+      <!-- Skills -->
+      <section id="skills">
+        <h2>Skills</h2>
+        <div class="skills">
+          <div class="skill">HTML</div>
+          <div class="skill">CSS</div>
+          <div class="skill">JavaScript</div>
+          <div class="skill">React</div>
+          <div class="skill">Tailwind CSS</div>
+          <div class="skill">Node.js</div>
+          <div class="skill">Python</div>
+          <div class="skill">MySQL</div>
+          <div class="skill">MongoDB</div>
+          <div class="skill">Git/GitHub</div>
+        </div>
+      </section>
+
+      <!-- Contact -->
+      <section id="contact">
+        <h2>Contact</h2>
+        <div class="contact-grid">
+          <form class="contact-form card" onsubmit="handleContact(event)">
+            <label>Name</label>
+            <input required name="name" placeholder="Your name" />
+            <label>Email</label>
+            <input required name="email" type="email" placeholder="you@example.com" />
+            <label>Message</label>
+            <textarea required name="message" rows="5"></textarea>
+            <button type="submit" class="btn">Send</button>
+          </form>
+          <aside class="card" style="display:flex;flex-direction:column;gap:10px">
+            <div><strong>Email</strong><div style="color:var(--muted)">roshini@example.com</div></div>
+            <div><strong>Phone</strong><div style="color:var(--muted)">+91 98765 43210</div></div>
+            <div><strong>LinkedIn</strong><div><a class="tag" href="#">linkedin.com/in/roshini</a></div></div>
+            <div><strong>GitHub</strong><div><a class="tag" href="#">github.com/roshini</a></div></div>
+          </aside>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div>© <span id="year"></span> Maramulla Roshini — Built with ❤</div>
+    </footer>
+  </div>
+
+  <script>
+    (function(){
+      const toggle = document.querySelector('.menu-toggle');
+      const navList = document.getElementById('nav-list');
+      toggle && toggle.addEventListener('click', ()=>{
+        const expanded = toggle.getAttribute('aria-expanded') === 'true';
+        toggle.setAttribute('aria-expanded', String(!expanded));
+        navList.style.display = navList.style.display === 'flex' ? '' : 'flex';
+        navList.style.flexDirection = 'column';
+      });
+      document.getElementById('year').textContent = new Date().getFullYear();
+    })();
+    function handleContact(e){
+      e.preventDefault();
+      const form = e.target;
+      alert("Thanks " + form.name.value + "! Your message was received.");
+      form.reset();
+    }
+  </script>
+</body>
+</html>

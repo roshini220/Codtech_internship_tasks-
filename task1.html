@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Interactive Quiz Application</title>
+  <style>
+    :root{
+      --bg:#0f172a; /* slate-900 */
+      --panel:#111827; /* gray-900 */
+      --muted:#334155; /* slate-600 */
+      --text:#e5e7eb; /* gray-200 */
+      --accent:#4f46e5; /* indigo-600 */
+      --accent-2:#22c55e; /* green-500 */
+      --accent-3:#ef4444; /* red-500 */
+      --card:#0b1220; /* custom */
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box}
+    html, body {height: 100%}
+    body{
+      margin:0; font-family: system-ui,-apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: radial-gradient(1200px 800px at 10% 0%, #111827 10%, #0f172a 60%, #0b1220 100%), var(--bg);
+      color:var(--text); display:flex; align-items:center; justify-content:center; padding:24px;
+    }
+    .app{
+      width: min(900px, 100%);
+      background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01));
+      border:1px solid rgba(255,255,255,.06);
+      border-radius: 20px; box-shadow: var(--shadow); overflow: hidden;
+    }
+    header{
+      padding: 20px 24px; display:flex; gap:16px; align-items:center; justify-content:space-between;
+      background: linear-gradient(90deg, rgba(79,70,229,.15), rgba(34,197,94,.15));
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+    .title {font-weight: 800; letter-spacing:.2px;}
+    .badge {font-size:12px; padding:6px 10px; border-radius:999px; background: rgba(79,70,229,.18); border:1px solid rgba(79,70,229,.35)}
+    .content{ display:grid; grid-template-columns: 1fr; gap: 0;}
+
+    .controls{
+      padding: 16px 24px; display:flex; flex-wrap:wrap; gap:12px; align-items:center; border-bottom:1px solid rgba(255,255,255,.06);
+      background: rgba(255,255,255,.01);
+    }
+    .controls > * {flex: none}
+    .controls label{font-size: 14px; color:#cbd5e1}
+    .btn{
+      appearance:none; border:none; background:var(--accent); color:white; padding:10px 14px; border-radius:12px; cursor:pointer;
+      font-weight:600; transition: transform .04s ease, background .2s ease, opacity .2s ease;
+    }
+    .btn:hover{ transform: translateY(-1px) }
+    .btn:disabled{ opacity:.5; cursor:not-allowed }
+    .btn.secondary{ background: transparent; border:1px solid rgba(255,255,255,.14) }
+    .btn.ghost{ background: transparent; color:#cbd5e1; border:none }
+    .file{ padding:8px 10px; border-radius:12px; background:rgba(255,255,255,.04); border:1px dashed rgba(255,255,255,.15); }
+
+    .panel{ padding:24px; }
+
+    .progress{
+      height: 10px; background: rgba(255,255,255,.06); border-radius:999px; overflow:hidden; margin: 0 24px 18px; border:1px solid rgba(255,255,255,.06)
+    }
+    .bar{ height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), #06b6d4); transition: width .3s ease }
+
+    .card{
+      background: rgba(255,255,255,.02); border:1px solid rgba(255,255,255,.06); border-radius:18px; padding: 20px; box-shadow: var(--shadow);
+    }
+    .question{ font-size: 18px; font-weight: 700; margin-bottom: 14px; }
+
+    .options{ display:grid; gap: 10px; margin: 14px 0 6px }
+    .option{
+      width: 100%; text-align:left; padding:14px 14px; border-radius:12px; border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.02); color:var(--text); cursor:pointer; font-weight:600;
+      transition: background .15s ease, border-color .15s ease, transform .04s ease;
+    }
+    .option:hover{ background: rgba(255,255,255,.05); transform: translateY(-1px) }
+    .option.correct{ border-color: rgba(34,197,94,.6); background: rgba(34,197,94,.12) }
+    .option.wrong{ border-color: rgba(239,68,68,.6); background: rgba(239,68,68,.12) }
+    .option:disabled{ opacity:.8; cursor:not-allowed }
+
+    .feedback{ margin-top: 10px; font-weight:700 }
+    .feedback.ok{ color: var(--accent-2) }
+    .feedback.no{ color: var(--accent-3) }
+
+    .meta { display:flex; gap:14px; align-items:center; color:#cbd5e1; font-size: 14px; margin-top: 6px }
+
+    .footer{ display:flex; justify-content:space-between; gap:12px; margin-top: 18px }
+
+    .hidden{ display:none !important }
+
+    /* Results */
+    .results h2{ margin: 0 0 8px }
+    .results .grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:12px; margin-top: 10px }
+    .pill{ padding: 10px 12px; border:1px solid rgba(255,255,255,.12); border-radius:12px; background: rgba(255,255,255,.02) }
+
+    .review{ margin-top: 18px; display:grid; gap: 12px }
+    .review .q{ font-weight:700 }
+    .review .a{ font-size:14px; color:#cbd5e1 }
+
+    @media (max-width: 520px){
+      header{ flex-direction:column; align-items:flex-start; gap:8px }
+      .controls{ gap:10px }
+      .footer{ flex-direction:column }
+    }
+  </style>
+</head>
+<body>
+  <div class="app" role="application" aria-label="Interactive Quiz Application">
+    <header>
+      <div>
+        <div class="title">Interactive Quiz Application</div>
+        <div style="opacity:.8; font-size:14px">Vanilla JS • Instant feedback • Dynamic question loading</div>
+      </div>
+      <div class="badge" id="statusBadge" aria-live="polite">Ready</div>
+    </header>
+
+    <div class="content">
+      <div class="controls" aria-label="Quiz controls">
+        <label class="file" for="fileInput">📁 Load questions JSON
+          <input id="fileInput" type="file" accept="application/json" style="display:none" />
+        </label>
+        <button class="btn secondary" id="downloadTemplate">Download template</button>
+        <label style="display:inline-flex; gap:8px; align-items:center">
+          <input type="checkbox" id="shuffleToggle" /> Shuffle questions
+        </label>
+        <label style="display:inline-flex; gap:8px; align-items:center">
+          <input type="checkbox" id="instantToggle" checked/> Instant feedback
+        </label>
+        <button class="btn" id="startBtn">Start Quiz</button>
+        <button class="btn ghost" id="resetBtn" disabled>Reset</button>
+      </div>
+
+      <div class="progress" aria-hidden="false" aria-label="Progress">
+        <div class="bar" id="progressBar"></div>
+      </div>
+
+      <main class="panel" id="mainPanel">
+        <div class="card" id="intro">
+          <p style="margin:0 0 10px; opacity:.9">Upload your own question bank or use the built‑in sample to begin. Each question gives instant feedback and an explanation. Scores update as you go.</p>
+          <ul style="margin:0 0 14px; padding-left:18px; opacity:.9">
+            <li>Dynamic loading from a JSON file</li>
+            <li>Instant feedback (toggleable)</li>
+            <li>Scoring, progress bar, and review screen</li>
+            <li>Keyboard accessible (1–4 to answer, N for next)</li>
+          </ul>
+          <details>
+            <summary>JSON format (example)</summary>
+            <pre style="white-space:pre-wrap; font-size:12px; opacity:.9; margin-top:8px">[
+  {
+    "id": 1,
+    "question": "What does HTML stand for?",
+    "choices": ["Hyper Trainer Marking Language", "HyperText Markup Language", "HyperText Marketing Language", "HighText Machine Language"],
+    "answerIndex": 1,
+    "explanation": "HTML stands for HyperText Markup Language."
+  }
+]</pre>
+          </details>
+        </div>
+
+        <section id="quiz" class="hidden" aria-live="polite">
+          <div class="card">
+            <div class="meta">
+              <span id="metaIndex">Question 1</span>
+              <span>•</span>
+              <span id="metaScore">Score: 0</span>
+            </div>
+            <div class="question" id="questionText">Question text</div>
+            <div class="options" id="options"></div>
+            <div class="feedback" id="feedback"></div>
+            <div class="footer">
+              <button class="btn secondary" id="nextBtn" disabled>Next (N)</button>
+              <span style="opacity:.8" id="explain"></span>
+            </div>
+          </div>
+        </section>
+
+        <section id="results" class="hidden results" aria-live="polite">
+          <div class="card">
+            <h2>Quiz Results</h2>
+            <div class="grid">
+              <div class="pill">Questions: <strong id="resTotal">0</strong></div>
+              <div class="pill">Correct: <strong id="resCorrect">0</strong></div>
+              <div class="pill">Accuracy: <strong id="resPct">0%</strong></div>
+            </div>
+            <div class="review" id="review"></div>
+            <div class="footer" style="margin-top:16px">
+              <button class="btn" id="retryBtn">Retry</button>
+              <button class="btn secondary" id="exportBtn">Export results (JSON)</button>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- Built-in sample questions as fallback -->
+      <script id="sample-questions" type="application/json">[
+  {
+    "id": 1,
+    "question": "Which JavaScript method is used to add one or more elements to the end of an array?",
+    "choices": ["push()", "pop()", "shift()", "unshift()"],
+    "answerIndex": 0,
+    "explanation": "push() adds one or more elements to the end of an array and returns the new length."
+  },
+  {
+    "id": 2,
+    "question": "In HTML, which tag is semantic?",
+    "choices": ["<div>", "<span>", "<section>", "<b>"],
+    "answerIndex": 2,
+    "explanation": "<section> conveys semantic meaning for a standalone section of content."
+  },
+  {
+    "id": 3,
+    "question": "CSS Flexbox: which property controls the main axis distribution of extra space?",
+    "choices": ["align-items", "justify-content", "flex-wrap", "align-content"],
+    "answerIndex": 1,
+    "explanation": "justify-content distributes items along the main axis (row by default)."
+  },
+  {
+    "id": 4,
+    "question": "What will `typeof null` return in JavaScript?",
+    "choices": ["\"null\"", "\"object\"", "\"undefined\"", "\"number\""],
+    "answerIndex": 1,
+    "explanation": "It's a long-standing quirk: `typeof null` returns 'object'."
+  },
+  {
+    "id": 5,
+    "question": "Which HTML attribute is used to define inline styles?",
+    "choices": ["class", "style", "font", "styles"],
+    "answerIndex": 1,
+    "explanation": "The 'style' attribute in HTML is used to apply inline CSS."
+  },
+  {
+    "id": 6,
+    "question": "Which CSS property changes the text color?",
+    "choices": ["font-style", "text-color", "color", "background-color"],
+    "answerIndex": 2,
+    "explanation": "The 'color' property defines the text color in CSS."
+  },
+  {
+    "id": 7,
+    "question": "Which HTML element is used to display a numbered list?",
+    "choices": ["<ul>", "<ol>", "<li>", "<dl>"],
+    "answerIndex": 1,
+    "explanation": "The <ol> element defines an ordered (numbered) list."
+  },
+  {
+    "id": 8,
+    "question": "Which CSS property controls the size of text?",
+    "choices": ["font-size", "text-style", "font-weight", "size"],
+    "answerIndex": 0,
+    "explanation": "The 'font-size' property controls the size of text."
+  },
+  {
+    "id": 9,
+    "question": "Which JavaScript keyword is used to declare a constant?",
+    "choices": ["let", "var", "const", "static"],
+    "answerIndex": 2,
+    "explanation": "The 'const' keyword declares a block-scoped constant variable."
+  },
+  {
+    "id": 10,
+    "question": "In HTML5, which tag is used to play video files?",
+    "choices": ["<media>", "<movie>", "<video>", "<play>"],
+    "answerIndex": 2,
+    "explanation": "The <video> tag is used to embed video content."
+  },
+  {
+    "id": 11,
+    "question": "Which CSS property is used to make text bold?",
+    "choices": ["font-weight", "text-decoration", "font-style", "bold"],
+    "answerIndex": 0,
+    "explanation": "The 'font-weight' property is used to set how thick or thin text should be displayed."
+  },
+  {
+    "id": 12,
+    "question": "Which function is used to print something to the browser console in JavaScript?",
+    "choices": ["console.log()", "print()", "echo()", "log.console()"],
+    "answerIndex": 0,
+    "explanation": "console.log() is used to print messages to the browser's developer console."
+  }
+
+  ]</script>
+
+  <script>
+    // --- State ---
+    let QUESTIONS = [];
+    let current = 0;
+    let score = 0;
+    let answered = false;
+    let userAnswers = []; // {id, correct, chosen, correctIndex}
+
+    // --- DOM refs ---
+    const statusBadge = document.getElementById('statusBadge');
+    const fileInput = document.getElementById('fileInput');
+    const downloadTemplateBtn = document.getElementById('downloadTemplate');
+    const shuffleToggle = document.getElementById('shuffleToggle');
+    const instantToggle = document.getElementById('instantToggle');
+    const startBtn = document.getElementById('startBtn');
+    const resetBtn = document.getElementById('resetBtn');
+
+    const intro = document.getElementById('intro');
+    const quiz = document.getElementById('quiz');
+    const results = document.getElementById('results');
+
+    const metaIndex = document.getElementById('metaIndex');
+    const metaScore = document.getElementById('metaScore');
+    const qText = document.getElementById('questionText');
+    const optionsBox = document.getElementById('options');
+    const feedback = document.getElementById('feedback');
+    const explain = document.getElementById('explain');
+    const progressBar = document.getElementById('progressBar');
+    const nextBtn = document.getElementById('nextBtn');
+
+    const resTotal = document.getElementById('resTotal');
+    const resCorrect = document.getElementById('resCorrect');
+    const resPct = document.getElementById('resPct');
+    const review = document.getElementById('review');
+    const retryBtn = document.getElementById('retryBtn');
+    const exportBtn = document.getElementById('exportBtn');
+
+    // --- Utils ---
+    const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+    const shuffle = arr => arr.map(v=>({v, r:Math.random()})).sort((a,b)=>a.r-b.r).map(o=>o.v);
+
+    function setBadge(text, kind = 'info'){
+      statusBadge.textContent = text;
+      statusBadge.style.background = kind === 'ok' ? 'rgba(34,197,94,.15)' : kind === 'warn' ? 'rgba(239,68,68,.15)' : 'rgba(79,70,229,.18)';
+      statusBadge.style.borderColor = kind === 'ok' ? 'rgba(34,197,94,.4)' : kind === 'warn' ? 'rgba(239,68,68,.4)' : 'rgba(79,70,229,.35)';
+    }
+
+    function percent(n, d){ return d ? Math.round((n/d)*100) : 0 }
+
+    function updateProgress(){
+      const pct = percent(current, QUESTIONS.length);
+      progressBar.style.width = pct + '%';
+    }
+
+    function loadSample(){
+      try{
+        const raw = document.getElementById('sample-questions').textContent;
+        const data = JSON.parse(raw);
+        return data;
+      }catch(e){
+        console.error('Failed to parse sample questions', e);
+        return [];
+      }
+    }
+
+    function validateBank(bank){
+      if(!Array.isArray(bank) || bank.length === 0) return {ok:false, msg:'Question array is empty.'};
+      for(const [i,q] of bank.entries()){
+        if(typeof q.question !== 'string' || !Array.isArray(q.choices) || typeof q.answerIndex !== 'number'){
+          return {ok:false, msg:`Invalid structure at item ${i+1}`};
+        }
+        if(q.answerIndex < 0 || q.answerIndex >= q.choices.length){
+          return {ok:false, msg:`answerIndex out of range at item ${i+1}`};
+        }
+      }
+      return {ok:true};
+    }
+
+    function prepareQuiz(bank){
+      QUESTIONS = shuffleToggle.checked ? shuffle(bank) : bank.slice();
+      current = 0; score = 0; answered = false; userAnswers = [];
+      metaScore.textContent = `Score: ${score}`;
+      updateProgress();
+      intro.classList.add('hidden');
+      results.classList.add('hidden');
+      quiz.classList.remove('hidden');
+      renderQuestion();
+      resetBtn.disabled = false;
+      setBadge('Quiz running', 'ok');
+    }
+
+    function renderQuestion(){
+      const q = QUESTIONS[current];
+      metaIndex.textContent = `Question ${current+1} of ${QUESTIONS.length}`;
+      qText.textContent = q.question;
+      optionsBox.innerHTML = '';
+      feedback.textContent = '';
+      explain.textContent = '';
+      nextBtn.disabled = true;
+      answered = false;
+
+      const choices = q.shuffleChoices ? shuffle(q.choices) : q.choices.slice();
+
+      choices.forEach((choice, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'option';
+        btn.textContent = choice;
+        btn.setAttribute('data-index', idx);
+        btn.onclick = () => handleAnswer(idx, choices, q);
+        optionsBox.appendChild(btn);
+      });
+    }
+
+    async function handleAnswer(idx, renderChoices, q){
+      if(answered) return;
+      answered = true;
+
+      // determine the index in the rendered list that corresponds to the correct answer
+      const correctText = q.choices[q.answerIndex];
+      const correctIdxRendered = renderChoices.findIndex(c => c === correctText);
+      const optionButtons = [...document.querySelectorAll('.option')];
+
+      const correct = idx === correctIdxRendered;
+      if(instantToggle.checked){
+        optionButtons.forEach((btn, bIdx) => {
+          btn.disabled = true;
+          if(bIdx === correctIdxRendered) btn.classList.add('correct');
+          if(bIdx === idx && !correct) btn.classList.add('wrong');
+        });
+        feedback.textContent = correct ? '✅ Correct!' : '❌ Not quite.';
+        feedback.className = 'feedback ' + (correct ? 'ok' : 'no');
+        if(q.explanation) explain.textContent = q.explanation;
+      }
+
+      if(correct) score++;
+      metaScore.textContent = `Score: ${score}`;
+
+      userAnswers.push({ id: q.id ?? current+1, correct, chosen: renderChoices[idx], correctText, correctIndex: q.answerIndex });
+
+      nextBtn.disabled = false;
+      updateProgress();
+    }
+
+    function nextQuestion(){
+      if(current < QUESTIONS.length - 1){
+        current++;
+        renderQuestion();
+      } else {
+        finish();
+      }
+    }
+
+    function finish(){
+      quiz.classList.add('hidden');
+      results.classList.remove('hidden');
+      const total = QUESTIONS.length;
+      const accuracy = percent(score, total);
+      resTotal.textContent = total;
+      resCorrect.textContent = score;
+      resPct.textContent = accuracy + '%';
+
+      review.innerHTML = '';
+      QUESTIONS.forEach((q, i) => {
+        const ua = userAnswers[i];
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <div class="q">${i+1}. ${q.question}</div>
+          <div class="a">Your answer: ${ua?.chosen ?? '<em>skipped</em>'}</div>
+          <div class="a">Correct answer: ${q.choices[q.answerIndex]}</div>
+          ${q.explanation ? `<div class="a">Explanation: ${q.explanation}</div>` : ''}
+        `;
+        review.appendChild(card);
+      });
+
+      setBadge('Quiz complete');
+    }
+
+    // --- Events ---
+    startBtn.addEventListener('click', () => {
+      if(!QUESTIONS.length){
+        QUESTIONS = loadSample();
+        const v = validateBank(QUESTIONS);
+        if(!v.ok){ setBadge('Invalid sample. Load your JSON.', 'warn'); return; }
+      }
+      prepareQuiz(QUESTIONS);
+    });
+
+    resetBtn.addEventListener('click', () => {
+      QUESTIONS = [];
+      intro.classList.remove('hidden');
+      quiz.classList.add('hidden');
+      results.classList.add('hidden');
+      progressBar.style.width = '0%';
+      setBadge('Ready');
+      resetBtn.disabled = true;
+      metaScore.textContent = 'Score: 0';
+    });
+
+    nextBtn.addEventListener('click', nextQuestion);
+
+    document.addEventListener('keydown', (e) => {
+      if(quiz.classList.contains('hidden')) return;
+      const key = e.key.toLowerCase();
+      if(['1','2','3','4'].includes(key)){
+        const idx = parseInt(key,10) - 1;
+        const btn = document.querySelectorAll('.option')[idx];
+        if(btn) btn.click();
+      } else if(key === 'n'){
+        if(!nextBtn.disabled) nextBtn.click();
+      }
+    });
+
+    retryBtn.addEventListener('click', () => {
+      prepareQuiz(QUESTIONS);
+    });
+
+    exportBtn.addEventListener('click', () => {
+      const payload = {
+        takenAt: new Date().toISOString(),
+        total: QUESTIONS.length,
+        correct: score,
+        accuracy: percent(score, QUESTIONS.length),
+        answers: userAnswers,
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'quiz-results.json'; a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    downloadTemplateBtn.addEventListener('click', () => {
+      const template = [
+        {
+          id: 1,
+          question: "What does HTML stand for?",
+          choices: ["Hyper Trainer Marking Language", "HyperText Markup Language", "HyperText Marketing Language", "HighText Machine Language"],
+          answerIndex: 1,
+          explanation: "HTML stands for HyperText Markup Language."
+        },
+        {
+          id: 2,
+          question: "Which method converts a JSON string to a JavaScript object?",
+          choices: ["JSON.parse()", "JSON.stringify()", "Object.fromJSON()", "toJSON()"],
+          answerIndex: 0,
+          explanation: "JSON.parse() converts JSON strings into JS values."
+        }
+      ];
+      const blob = new Blob([JSON.stringify(template, null, 2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'questions-template.json'; a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    fileInput.addEventListener('change', async (e) => {
+      const file = e.target.files?.[0];
+      if(!file) return;
+      try{
+        const text = await file.text();
+        const data = JSON.parse(text);
+        const v = validateBank(data);
+        if(!v.ok){ setBadge(v.msg, 'warn'); return; }
+        QUESTIONS = data;
+        setBadge(`Loaded ${data.length} question${data.length>1?'s':''}`, 'ok');
+      }catch(err){
+        console.error(err);
+        setBadge('Failed to load JSON', 'warn');
+      }
+    });
+
+  </script>
+</body>
+</html>
